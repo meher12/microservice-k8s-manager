@@ -21,20 +21,20 @@ export class AppComponent implements OnInit {
   }
 
   getProducts() {
-    this.http.get('/api/products').subscribe((data: any) => {
+    this.http.get('/products').subscribe((data: any) => {
       this.products = data;
     });
   }
 
   getOrders() {
-    this.http.get('/api/orders').subscribe((data: any) => {
+    this.http.get('/orders').subscribe((data: any) => {
       this.orders = data;
     });
   }
 
   placeOrder(productId: number) {
     const order = { productId, quantity: 1 };
-    this.http.post('/api/orders', order).subscribe(() => {
+    this.http.post('/orders', order).subscribe(() => {
       this.getOrders();
     });
   }
