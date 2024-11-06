@@ -30,6 +30,14 @@ La configuration sur la branche "master" utilise également NGINX comme serveur 
 La branche "feature/multiserveur-nginx" introduit une architecture multi-serveurs plus évolutive, avec un découplage plus important entre les composants backend et frontend.
 
 # 2-Créer les configurations NGINX pour chaque service:
-La branche "feature/multiserveur-nginx" introduit une architecture multi-serveurs
+La branche "feature/multiserveur-nginx" introduit une architecture multi-serveurs:
+Maintenant, chaque service devrait être accessible via son propre conteneur NGINX :
+
+    catalog-service via http://localhost:8081
+
+    order-service via http://localhost:8082
+
+    frontend-app via http://localhost:8083
+
 
 
