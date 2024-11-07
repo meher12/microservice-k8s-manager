@@ -39,5 +39,36 @@ Maintenant, chaque service devrait être accessible via son propre conteneur NGI
 
     frontend-app via http://localhost:8083
 
+# 3-Architecture Kubernetes
+
+Cette architecture utilise un service Kubernetes (de type LoadBalancer) pour exposer trois services Node.js déployés en tant que Pods dans un cluster Kubernetes.
+
+## Diagramme de l'architecture
+```
++-----------------------------+------------------+
+|        Kubernetes Service (LoadBalancer)       |
++-----------------------------+------------------+
+            /                |               \
+           /                 |                \
+          v                  v                 v
++-------------+      +-------------+      +-------------+
+|  Service 1  |      |  Service 2  |      |  Service 3  |
+|  (Node.js)  |      |  (Node.js)  |      |  (Node.js)  |
++-------------+      +-------------+      +-------------+
+      |                   |                    |
+      v                   v                    v
++--------------+    +--------------+     +--------------+
+|    Pod 1     |    |    Pod 2     |     |    Pod 3     |
+|(Docker image)|    |(Docker image)|     |(Docker image)|
++--------------+    +--------------+     +--------------+
+```
+
+## Composants de l'architecture
+
+1. **Service Kubernetes (LoadBalancer)** : Ce service expose les trois services Node.js à l'extérieur du cluster Kubernetes. Il utilise le type `LoadBalancer` pour fournir une adresse IP publique accessible depuis l'extérieur.
+
+2. **Services Node.js** : Ces trois services sont des applications Node.js déployées en tant que Pods dans le cluster Kubernetes. Ils communiquent avec le service Kubernetes pour recevoir les requêtes des clients.
+
+3. **Pods** : Chaque service Node.js est encapsulé dans un Pod, qui contient l'image Docker correspondante.
 
 
