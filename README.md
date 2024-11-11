@@ -72,3 +72,44 @@ Cette architecture utilise un service Kubernetes (de type LoadBalancer) pour exp
 3. **Pods** : Chaque service Node.js est encapsulé dans un Pod, qui contient l'image Docker correspondante.
 
 
+# Architecture du Système dans la branche 'feature/k8s-deploy'
+
+## Vue d'ensemble
+Ce document décrit l'architecture d'un système distribué utilisant Kubernetes et différents services.
+
+## Diagramme de flux
+
+![Diagramme d'architecture](architecture1.png)
+
+
+## Description des composants
+
+### Infrastructure
+- **Kubernetes Service (LoadBalancer)** : Point d'entrée principal qui gère la distribution du trafic
+- **Serveur NGINX** : Serveur web qui agit comme reverse proxy
+
+### Services
+1. **Service 1**
+   - Frontend développé en Angular
+   - Gère le Pod 1
+   - Communique avec Service 2 et Service 3
+
+2. **Service 2**
+   - Backend développé en Node.js/Express
+   - Gère le Pod 2
+
+3. **Service 3**
+   - Backend développé en Node.js/Express
+   - Gère le Pod 3
+
+## Flux de données
+1. Les requêtes entrent par le LoadBalancer Kubernetes
+2. Le trafic est dirigé vers le serveur NGINX
+3. NGINX route les requêtes vers Service 1
+4. Service 1 peut :
+   - Traiter la requête directement via Pod 1
+   - Transférer la requête vers Service 2
+   - Transférer la requête vers Service 3
+5. Service 2 et Service 3 traitent leurs requêtes respectives via Pod 2 et Pod 3
+
+
