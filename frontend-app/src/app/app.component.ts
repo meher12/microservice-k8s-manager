@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient, HttpClientModule } from '@angular/common/http'; // Importer HttpClientModule
 import { CommonModule } from '@angular/common';
+import { environment } from '../environments/environment.prod'; // Importer l'environnement
 
 @Component({
   selector: 'app-root',
@@ -21,20 +22,20 @@ export class AppComponent implements OnInit {
   }
 
   getProducts() {
-    this.http.get('/api/products').subscribe((data: any) => {
+    this.http.get('/products').subscribe((data: any) => {
       this.products = data;
     });
   }
 
   getOrders() {
-    this.http.get('/api/orders').subscribe((data: any) => {
+    this.http.get('/orders').subscribe((data: any) => {
       this.orders = data;
     });
   }
 
   placeOrder(productId: number) {
     const order = { productId, quantity: 1 };
-    this.http.post('/api/orders', order).subscribe(() => {
+    this.http.post('/orders', order).subscribe(() => {
       this.getOrders();
     });
   }
