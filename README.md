@@ -1,4 +1,4 @@
-# 1- Configuration du serveur unique pour la gestion des requêtes
+
 
 ## Présentation
 
@@ -28,16 +28,5 @@ Cette configuration permet de centraliser la gestion des requêtes et de simplif
 ## Comparaison avec la branche "master"
 La configuration sur la branche "master" utilise également NGINX comme serveur proxy, mais dans une architecture plus simple avec un seul serveur.
 La branche "feature/multiserveur-nginx" introduit une architecture multi-serveurs plus évolutive, avec un découplage plus important entre les composants backend et frontend.
-
-# 2-Créer les configurations NGINX pour chaque service:
-La branche "feature/multiserveur-nginx" introduit une architecture multi-serveurs:
-Maintenant, chaque service devrait être accessible via son propre conteneur NGINX :
-
-    catalog-service via http://localhost:8081
-
-    order-service via http://localhost:8082
-
-    frontend-app via http://localhost:8083
-
 
 
