@@ -22,21 +22,27 @@ export class AppComponent implements OnInit {
   }
 
   getProducts() {
-    this.http.get('/products').subscribe((data: any) => {
+    this.http.get(`${environment.apiUrl}/api/products`).subscribe((data: any) => {
       this.products = data;
+    }, error => {
+      console.error('There was an error!', error);
     });
   }
 
   getOrders() {
-    this.http.get('/orders').subscribe((data: any) => {
+    this.http.get(`${environment.apiUrl}/api/orders`).subscribe((data: any) => {
       this.orders = data;
+    }, error => {
+      console.error('There was an error!', error);
     });
   }
 
   placeOrder(productId: number) {
     const order = { productId, quantity: 1 };
-    this.http.post('/orders', order).subscribe(() => {
+    this.http.post(`${environment.apiUrl}/api/orders`, order).subscribe(() => {
       this.getOrders();
+    }, error => {
+      console.error('There was an error!', error);
     });
   }
 }

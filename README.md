@@ -1,32 +1,46 @@
 
 
-## Présentation
+# Démarrer le Serveur Angular avec le Proxy
 
-Cette configuration met en place un serveur NGINX unique qui agit comme un serveur proxy inverse. Toutes les requêtes entrantes passent par ce serveur NGINX qui distribue ensuite les requêtes aux différents services backend (catalog-service, order-service) et au frontend (frontend-app).
-###NB: Cette partie est pour la branche "master" :
-## Fonctionnement
+### Lancez le serveur Angular avec la configuration proxy :
+```
+ng serve --proxy-config proxy.conf.json
+```
 
-### Requêtes des utilisateurs
-Les utilisateurs envoient leurs requêtes à NGINX via `http://localhost:80`.
+L'ajout de proxy en local est principalement utilisé dans l'environnement de développement. Lorsque vous configurez un proxy via un fichier proxy.conf.json et que vous lancez votre serveur Angular avec ng serve --proxy-config proxy.conf.json, cela permet à votre application Angular de rediriger certaines requêtes API vers un serveur backend pendant que vous développez localement.
+Pourquoi le Proxy Est Principalement Utilisé en Environnement de Développement :
 
-### Proxy inverse
-NGINX reçoit les requêtes et les redirige vers les services appropriés en fonction des chemins spécifiés :
+    Facilité de Développement : Il permet aux développeurs de séparer le frontend et le backend tout en travaillant localement.
 
-- Les requêtes vers `/api/products` sont proxy-passées à `http://catalog-service:3001/products`.
-- Les requêtes vers `/api/orders` sont proxy-passées à `http://order-service:3002/orders`.
-- Les autres requêtes (`/`) sont proxy-passées à `http://frontend:80`.
+    Simplification des Requêtes API : Les développeurs n'ont pas besoin de mettre à jour les URL des API dans chaque requête.
 
-Cette configuration permet de centraliser la gestion des requêtes et de simplifier la communication entre les différents composants de l'application.
+    Éviter les Problèmes de CORS : En redirigeant les requêtes API localement, les problèmes de CORS (Cross-Origin Resource Sharing) peuvent être évités pendant le développement.
 
-## Avantages
+En Production
 
-- **Centralisation des requêtes** : Toutes les requêtes passent par un seul serveur NGINX, facilitant la gestion et la supervision du trafic.
-- **Découplage des services** : Les services backend (catalog-service, order-service) et le frontend (frontend-app) sont découplés et peuvent être déployés et gérés indépendamment.
-- **Évolutivité** : Cette configuration permet de facilement ajouter ou modifier des services backend sans impacter le frontend.
-- **Sécurité** : NGINX peut également jouer un rôle dans la sécurisation des communications, en gérant les aspects de SSL/TLS, de sécurité des en-têtes HTTP, etc.
+En production, vous n'utiliserez généralement pas ng serve, mais vous allez compiler et servir votre application Angular avec un serveur web comme Nginx ou Apache. Ces serveurs web peuvent également être configurés pour rediriger les requêtes API.
 
-## Comparaison avec la branche "master"
-La configuration sur la branche "master" utilise également NGINX comme serveur proxy, mais dans une architecture plus simple avec un seul serveur.
-La branche "feature/multiserveur-nginx" introduit une architecture multi-serveurs plus évolutive, avec un découplage plus important entre les composants backend et frontend.
+#### Exemple de Configuration Nginx pour la Production :
+```
+server {
+    listen 80;
+    server_name my-angular-app.com;
+
+    root /usr/share/nginx/html;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /api/ {
+        proxy_pass http://backend-server:3001;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
 
 
