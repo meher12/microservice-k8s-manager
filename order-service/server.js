@@ -6,13 +6,13 @@ const app = express();
 const port = 3002;
 
 // Enable CORS for all routes and set the allowed origin
-app.use(cors({ origin: 'http://127.0.0.1:4200' }));
+app.use(cors({ origin: 'http://frontend-service:80' })); 
 
 // Middleware to parse JSON
 app.use(express.json());
 
 // Connexion MongoDB
-const mongoUrl = 'mongodb://root:example@localhost:27017/orders?authSource=admin';
+const mongoUrl = 'mongodb://root:example@mongodb-service:27017/orders?authSource=admin';
 mongoose.connect(mongoUrl, {
   useNewUrlParser: true,
   useUnifiedTopology: true

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-deployment
+  namespace: local-microservices
+spec:
+  selector:
+    matchLabels:
+      app: order-products
+  template:
+    metadata:
+      labels:
+        app: order-products
+    spec:
+      containers:
+      - name: order-container
+        image: maldini12/order-products
+        ports:
+        - containerPort: 3002
+        env:
+        - name: MONGO_URL
+          value: "mongodb://root:example@mongodb-service:27017/orders?authSource=admin"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: local-microservices
+spec:
+  selector:
+    app: order-products
+  ports:
+  - port: 3002
+    targetPort: 3002
+    protocol: TCP

@@ -6,7 +6,7 @@ const app = express();
 const port = 3001;
 
 // Configure Redis client
-const client = redis.createClient({ url: 'redis://localhost:6379' });
+const client = redis.createClient({ url: 'redis://redis-service:6379' });
 
 // Connecter au client Redis
 (async () => {
@@ -29,7 +29,7 @@ const client = redis.createClient({ url: 'redis://localhost:6379' });
 
 // Middleware to parse JSON and handle CORS
 app.use(express.json());
-app.use(cors({ origin: 'http://127.0.0.1:4200' }));  // Allow requests from the frontend server
+app.use(cors({ origin: 'http://frontend-service:80' }));  // Allow requests from the frontend server
 
 // Handle Redis connection errors
 client.on('error', (err) => {
