@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: order-statefulset
+  namespace: local-microservices
+spec:
+  serviceName: "order-headless-service" # Headless Service to manage network identity / Identité réseau stable
+  replicas: 2 # Adjust as needed
+  selector:
+    matchLabels:
+      app: order-products
+  template:
+    metadata:
+      labels:
+        app: order-products
+    spec:
+      containers:
+      - name: order-container
+        image: maldini12/order-products
+        ports:
+        - containerPort: 3002
+        env:
+        - name: MONGO_URL
+          value: "mongodb://root:example@mongodb-service:27017/orders?authSource=admin"
+        volumeMounts:
+        - name: order-storage
+          mountPath: /data # Chemin où les données seront stockées dans le conteneur
+  volumeClaimTemplates: # Stockage persistant
+  - metadata:
+      name: order-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: "standard" # Adjust based on your storage class
+      resources:
+        requests:
+          storage: 100Mi # Specify storage size as needed
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-headless-service
+  namespace: local-microservices
+spec:
+  clusterIP: None # This makes it a headless service (Service sans cluster IP)
+  selector:
+    app: order-products
+  ports:
+  - port: 3002
+    targetPort: 3002
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+  namespace: local-microservices
+spec:
+  selector:
+    app: order-products
+  ports:
+  - port: 3002
+    targetPort: 3002
+    protocol: TCP
