@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-nginx-external
+  namespace: ingress-nginx
+spec:
+  type: ExternalName
+  externalName: loadbalancer-nginx-service.local-microservices.svc.cluster.local
+  ports:
+    - port: 80

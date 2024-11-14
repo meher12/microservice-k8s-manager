@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-app-ingress
+  namespace: ingress-nginx
+spec:
+  rules:
+    - host: first-ingress-app.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: loadbalancer-nginx-external
+                port:
+                  number: 80

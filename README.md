@@ -375,6 +375,112 @@ kubectl exec -it order-statefulset-0 -n local-microservices -- tar xzf /tmp/back
 - Certains environnements ne supportent pas l'extension de volume
 - Toujours faire une sauvegarde avant de modifier le stockage
 
+# Configuration Kubernetes avec Nginx Ingress Controller
 
+La configuration de cette partie du projet implique la configuration d'un Ingress Controller Nginx dans un namespace dédié, qui se connecte à un service LoadBalancer dans un namespace distinct.
+
+
+## Architecture
+
+L'architecture se compose de trois composants principaux :
+
+1. Un service LoadBalancer dans le namespace `local-microservices`
+2. Un service ExternalName dans le namespace `loadbalancer-nginx-external`
+3. Un Ingress Controller dans le namespace `ingress-nginx`
+
+## Composants
+
+### 1. Service LoadBalancer (namespace: local-microservices)
+
+Ce service expose l'application Nginx :
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-nginx-service
+  namespace: local-microservices
+spec:
+  selector:
+    app: nginx
+  ports:
+    - port: 80
+      targetPort: 80
+  type: LoadBalancer
+```
+
+### 2. Service ExternalName (namespace: ingress-nginx)
+
+Ce service permet la communication cross-namespace :
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: loadbalancer-nginx-external
+  namespace: ingress-nginx
+spec:
+  type: ExternalName
+  externalName: loadbalancer-nginx-service.local-microservices.svc.cluster.local
+  ports:
+    - port: 80
+```
+
+### 3. Ingress Controller (namespace: ingress-nginx)
+
+Configure les règles de routage :
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: my-app-ingress
+  namespace: ingress-nginx
+spec:
+  rules:
+    - host: first-ingress-app.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: loadbalancer-nginx-external
+                port:
+                  number: 80
+```
+
+## Configuration DNS
+
+Ajoutez l'entrée suivante à votre fichier hosts ou configurez votre DNS :
+```
+<EXTERNAL-IP> first-ingress-app.com
+```
+
+## Notes importantes
+
+- Assurez-vous que l'Ingress Controller Nginx est installé dans votre cluster
+- Vérifiez que les services sont dans le bon état avant de configurer l'Ingress
+- Le service ExternalName permet la communication entre les namespaces
+
+## Dépannage
+
+Si vous rencontrez des problèmes :
+
+1. Vérifiez les logs du pod Nginx :
+```bash
+kubectl logs -n local-microservices <pod-name>
+```
+
+2. Vérifiez les logs de l'Ingress Controller :
+```bash
+kubectl logs -n ingress-nginx <ingress-controller-pod>
+```
+
+3. Vérifiez que les services sont accessibles :
+```bash
+kubectl describe svc -n local-microservices loadbalancer-nginx-service
+kubectl describe svc -n ingress-nginx loadbalancer-nginx-external
+```
 
 
