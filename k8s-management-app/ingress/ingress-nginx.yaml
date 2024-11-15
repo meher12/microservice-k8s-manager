@@ -3,7 +3,13 @@ kind: Ingress
 metadata:
   name: my-app-ingress
   namespace: ingress-nginx
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
 spec:
+  tls:
+    - hosts:
+        - first-ingress-app.com
+      secretName: tls-secret 
   rules:
     - host: first-ingress-app.com
       http:

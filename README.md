@@ -482,5 +482,113 @@ kubectl logs -n ingress-nginx <ingress-controller-pod>
 kubectl describe svc -n local-microservices loadbalancer-nginx-service
 kubectl describe svc -n ingress-nginx loadbalancer-nginx-external
 ```
+# La création d'un secret TLS:
+2. Générez des certificats auto-signés
+
+Si vous n'avez pas encore de certificats, vous pouvez les générer à l'aide de OpenSSL :
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout cert.key -out cert.crt -subj "/CN=first-ingress-app.com/O=MyOrg"
+```
+
+    cert.crt : le fichier de certificat.
+    cert.key : la clé privée associée.
+
+3. Utilisez le chemin correct dans la commande
+
+Si vos fichiers sont dans un répertoire différent, utilisez leurs chemins absolus :
+```
+kubectl create secret tls tls-secret --cert=/chemin/vers/cert.crt --key=/chemin/vers/cert.key -n ingress-nginx
+```
+4. Vérifiez les permissions des fichiers
+
+Assurez-vous que vous avez les permissions nécessaires pour lire les fichiers. Si besoin, ajustez les permissions avec :
+```
+chmod 600 cert.crt cert.key
+```
+5. Validez la création du secret
+
+Une fois les certificats créés et la commande corrigée, exécutez-la à nouveau :
+```
+kubectl create secret tls tls-secret --cert=cert.crt --key=cert.key -n ingress-nginx
+```
+Puis vérifiez que le secret a bien été créé :
+```
+kubectl get secrets -n ingress-nginx
+```
+# Utilisation et vérification d'un secret TLS dans Kubernetes:
+Pour utiliser et vérifier un secret TLS dans Kubernetes (comme celui que vous avez créé pour le contrôleur Ingress), voici les étapes à suivre :
+
+
+
+### **Étape 1 : Configurer l’Ingress avec le secret TLS**
+Assurez-vous que l’Ingress utilise bien le secret `tls-secret` pour le TLS. Voici un exemple d'Ingress configuré pour utiliser le secret :
+
+```yaml
+spec:
+  tls:
+    - hosts:
+        - first-ingress-app.com
+      secretName: tls-secret  # Le secret TLS que nous avons créé
+```
+
+
+
+### **Étape 2 : Vérifier que le secret est utilisé dans l'Ingress**
+Après avoir appliqué le fichier d’Ingress, vérifiez que le secret est bien référencé :
+
+```bash
+kubectl describe ingress my-app-ingress -n ingress-nginx
+```
+
+Dans la sortie, vous devriez voir une section `TLS` avec l’hôte (`first-ingress-app.com`) et le nom du secret (`tls-secret`).
+
+
+### **Étape 3 : Vérifier la création et la validité du secret**
+Pour vérifier que le secret a bien été créé et contient les bonnes données :
+
+```bash
+kubectl get secret tls-secret -n ingress-nginx -o yaml
+```
+
+Cela devrait afficher le secret avec les champs **`tls.crt`** et **`tls.key`** en base64. Vous pouvez décoder pour vérifier la validité si nécessaire :
+
+```bash
+kubectl get secret tls-secret -n ingress-nginx -o jsonpath='{.data.tls\.crt}' | base64 --decode | openssl x509 -noout -text
+```
+
+Cette commande va afficher les détails du certificat TLS.
+
+
+
+### **Étape 4 : Tester l’accès HTTPS**
+Une fois que l’Ingress et le secret sont configurés, testez l’accès HTTPS à l’application pour vérifier si le certificat est bien utilisé :
+
+```bash
+curl -k https://first-ingress-app.com
+```
+
+- **Note** : Utilisez `-k` pour ignorer les erreurs de certificat auto-signé si vous avez utilisé un certificat généré manuellement.
+
+
+
+### **Étape 5 : Diagnostic et vérification des logs**
+Si vous rencontrez des problèmes, examinez les logs de l’Ingress Controller :
+
+```bash
+kubectl logs -l app.kubernetes.io/name=ingress-nginx -n ingress-nginx
+```
+
+Cela peut indiquer si le secret ou la configuration TLS posent des soucis.
+
+
+### Résumé
+1. Associez le secret TLS dans le manifeste Ingress.
+2. Vérifiez que l'Ingress utilise bien le secret avec `kubectl describe`.
+3. Vérifiez les données du secret.
+4. Testez l'accès HTTPS avec `curl -k`.
+5. En cas de problème, consultez les logs de l’Ingress Controller.
+
+---
+
 
 
